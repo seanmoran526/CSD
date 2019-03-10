@@ -31,25 +31,26 @@ popvariance:   .word64 0    ; space to store result to be printed, a 64-bit inte
                .text        ; start of code space
 main:
         lwu r1, length(r0)      ; load 32-bit unsigned integer at length label.
+        add r9, r1, r0
         sll r1, r1, 2
         add r2, r0, r0          ; initialize r2 so it can be a counter for loop
         add r4, r0, r0          ; initialize r4 for minimum
         add r5, r0, r0          ; initialize r5 for maximum
-        add r6, r0, r0          ; initialize r6 for average
+        dadd r6, r0, r0          ; initialize r6 for average
 loop1:  BEQ r2, r1, done
         lw r3, vector(r2)       ; load signed element from vector indexed by r2
         slt r7, r3, r4          ; sets r7 to 1 if r3 is less than r4(min)
         movn r4, r3, r7         ; if r7 is 1 then move r3 into r4(new min)
         slt r7, r5, r3          ; if r5 is less than r3 sets r7 to loop1
         movn r5, r3, r7         ; moves r3 into r5 if r3 was larger than last r5
-        add r6, r6, r3          ; keep running sum of elements
+        dadd r6, r6, r3          ; keep running sum of elements
         addi r2, r2, 4          ; increment counter
         B loop1                 ; unconditional branch to loop
 done:   sd r5, maximum(r0)
         sd r4, minimum(r0)
         dadd r7, r0, r0         ; initialize r7 for pop variance
         add r2, r0, r0          ; initialize r2 for counter
-        div r6, r1              ; div running total by num element
+        div r6, r8              ; div running total by num element
         mflo r6
         sd r6, average(r0)
 loop2:  BEQ r2, r1, done2
@@ -60,7 +61,7 @@ loop2:  BEQ r2, r1, done2
         dadd r7, r7, r8         ; accumulates pop variace
         addi r2, r2, 4
         B loop2
-done2:  ddiv r7, r1
+done2:  ddiv r7, r8
         mflo r7
         sd r7, popvariance(r0)
         
