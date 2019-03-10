@@ -31,6 +31,7 @@ popvariance:   .word64 0    ; space to store result to be printed, a 64-bit inte
                .text        ; start of code space
 main:
         lwu r1, length(r0)      ; load 32-bit unsigned integer at length label.
+        sll r1, r1, 2
         add r2, r0, r0          ; initialize r2 so it can be a counter for loop
         add r4, r0, r0          ; initialize r4 for minimum
         add r5, r0, r0          ; initialize r5 for maximum
