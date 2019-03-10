@@ -42,7 +42,7 @@ loop1:  BEQ r2, r1, done
         slt r7, r5, r3          ; if r5 is less than r3 sets r7 to loop1
         movn r5, r3, r7         ; moves r3 into r5 if r3 was larger than last r5
         add r6, r6, r3          ; keep running sum of elements
-        addi r2, r2, 1          ; increment counter
+        addi r2, r2, 4          ; increment counter
         B loop1                 ; unconditional branch to loop1
 done:   dadd r7, r0, r0         ; initialize r7 for pop variance
         add r2, r0, r0          ; initialize r2 for counter
@@ -53,7 +53,7 @@ loop2:  BEQ r2, r1, done2
         dsub r8, r3, r6         ; r8 = vector element - average
         dsll r8, r8, 1          ; squares r8
         dadd r7, r7, r8         ; accumulates pop variace
-        addi r2, r2, 1
+        addi r2, r2, 4
         B loop2
 done2:  ddiv r7, r1
         mflo r7
