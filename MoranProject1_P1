@@ -1,0 +1,89 @@
+;--------------------------------------------------------------------------
+; Program begin at symbol main
+; Computes statistics (min, max, ave, variance) about a vector of data, 
+; and prints the results to stdout.
+;--------------------------------------------------------------------------
+               	.data       ; start of data space
+      
+length: 	.word32 8   ; number of elements in the vector, a 32-bit unsigned integer.
+
+                           ; the vector; each element is a 32-bit signed integer.
+vector: 	.word32  207,-12,9,-2200,100,-1259,-999,108 
+
+
+;  Blocks needed to support system calls to the printf function.         
+printfstring0: .asciiz "The maximum is %d.\n\n"
+printfparams0: .space  8    ; space to store pointer to printfstring0.
+maximum:  	.word32 0    ; space to store result to be printed, a 32-bit integer.     
+
+printfstring1: .asciiz "The minimum is %d.\n\n"
+printfparams1: .space  8    ; space to store pointer to printfstring1.
+minimum:       .word32 0    ; space to store result to be printed, a 32-bit integer.                          
+
+printfstring2: .asciiz "The average is %d.\n\n"
+printfparams2: .space  8    ; space to store pointer to printfstring2.
+average:       .word32 0    ; space to store result to be printed, a 32-bit integer. 
+
+printfstring3: .asciiz "The population variance is %d.\n\n"
+printfparams3: .space  8    ; space to store pointer to printfstring3.
+popvariance:   .word64 0    ; space to store result to be printed, a 64-bit integer. 
+
+               .text        ; start of code space
+main:
+        lwu r1, length(r0)      ; load 32-bit unsigned integer at length label.
+        add r2, r0, r0          ; initialize r2 so it can be a counter for loop
+        add r4, r0, r0          ; initialize r4 for minimum
+        add r5, r0, r0          ; initialize r5 for maximum
+        add r6, r0, r0          ; initialize r6 for average
+loop1:  BEQ r2, r1, done
+        lw r3, vector(r2)       ; load signed element from vector indexed by r2
+        slt r7, r3, r4          ; sets r7 to 1 if r3 is less than r4(min)
+        movn r4, r3, r7         ; if r7 is 1 then move r3 into r4(new min)
+        slt r7, r5, r3          ; if r5 is less than r3 sets r7 to loop1
+        movn r5, r3, r7         ; moves r3 into r5 if r3 was larger than last r5
+        add r6, r6, r3          ; keep running sum of elements
+        addi r2, r2, 1          ; increment counter
+        B loop1                 ; unconditional branch to loop1
+done:   dadd r7, r0, r0         ; initialize r7 for pop variance
+        add r2, r0, r0          ; initialize r2 for counter
+        div r6, r1              ; div running total by num elements
+        mflo r6
+loop2:  BEQ r2, r1, done2
+        lw r3, vector(r2)
+        dsub r8, r3, r6         ; r8 = vector element - average
+        dsll r8, r8, 1          ; squares r8
+        dadd r7, r7, r8         ; accumulates pop variace
+        addi r2, r2, 1
+        B loop2
+done2:  ddiv r7, r1
+        mflo r7
+        
+ ; MODIFY THIS CODE TO PRINT ALL FOUR RESULTS; this template prints just one.
+ ; save result to designated spot in memory.
+ ; (Replace r3 with a reference to the register you used for your maximum.)
+ sw r5, maximum(r0)
+ sw r4, minimum(r0)
+ sw r6, average(r0)
+ sd r7, popvariance(r0)
+ ; this code prints the result. Before making system call syscall 5,
+ ; r14 must have the address of the parameters for the printf function.
+ ; at that address, the first thing is a pointer to the ascii string;
+ ; after that comes data for any parameters for the printf.
+daddi r1, r0, printfstring0     ; r5 now holds pointer to string to print
+sd r1, printfparams0(r0)        ; put pointer first in parameters section
+daddi r14, r0, printfparams0    ; syscall 5 expects address of parameters in r14.
+syscall 5
+daddi r1, r0, printfstring1     ; r5 now holds pointer to string to print
+sd r1, printfparams1(r0)        ; put pointer first in parameters section
+daddi r14, r0, printfparams1    ; syscall 5 expects address of parameters in r14.
+syscall 5
+daddi r1, r0, printfstring2     ; r5 now holds pointer to string to print
+sd r1, printfparams2(r0)        ; put pointer first in parameters section
+daddi r14, r0, printfparams2    ; syscall 5 expects address of parameters in r14.
+syscall 5
+daddi r1, r0, printfstring3     ; r5 now holds pointer to string to print
+sd r1, printfparams3(r0)        ; put pointer first in parameters section
+daddi r14, r0, printfparams3    ; syscall 5 expects address of parameters in r14.
+syscall 5
+ ; stop execution.
+ syscall 0
