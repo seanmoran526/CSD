@@ -50,7 +50,7 @@ done:   sd r5, maximum(r0)
         sd r4, minimum(r0)
         dadd r7, r0, r0         ; initialize r7 for pop variance
         add r2, r0, r0          ; initialize r2 for counter
-        div r6, r8              ; div running total by num element
+        div r6, r9              ; div running total by num element
         mflo r6
         sd r6, average(r0)
 loop2:  BEQ r2, r1, done2
@@ -61,7 +61,7 @@ loop2:  BEQ r2, r1, done2
         dadd r7, r7, r8         ; accumulates pop variace
         addi r2, r2, 4
         B loop2
-done2:  ddiv r7, r8
+done2:  ddiv r7, r9
         mflo r7
         sd r7, popvariance(r0)
         
