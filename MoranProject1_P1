@@ -31,13 +31,13 @@ popvariance:   .word64 0    ; space to store result to be printed, a 64-bit inte
                .text        ; start of code space
 main:
         lwu r9, length(r0)      ; load 32-bit unsigned integer at length label.
-        sll r11, r9, 2
+        sll r11, r9, 2          ; shift r9 left to account for 32 bit memory
         add r12, r0, r0          ; initialize r12 so it can be a counter for loop
         add r4, r0, r0          ; initialize r4 for minimum
         add r5, r0, r0          ; initialize r5 for maximum
         dadd r6, r0, r0          ; initialize r6 for average
 loop1:  BEQ r12, r11, done
-        lw r3, vector(r12)       ; load signed element from vector indexed by r2
+        lw r3, vector(r12)       ; load signed element from vector indexed by r12
         slt r7, r3, r4          ; sets r7 to 1 if r3 is less than r4(min)
         movn r4, r3, r7         ; if r7 is 1 then move r3 into r4(new min)
         slt r7, r5, r3          ; if r5 is less than r3 sets r7 to loop1
