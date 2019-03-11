@@ -76,23 +76,23 @@ done2:  ddiv r7, r9
  ; r14 must have the address of the parameters for the printf function.
  ; at that address, the first thing is a pointer to the ascii string;
  ; after that comes data for any parameters for the printf.
-print1: daddi r1, r0, printfstring0     ; r5 now holds pointer to string to print
-        sd r1, printfparams0(r0)        ; put pointer first in parameters section
+print1: daddi r10, r0, printfstring0     ; r5 now holds pointer to string to print
+        sd r10, printfparams0(r0)        ; put pointer first in parameters section
         daddi r14, r0, printfparams0    ; syscall 5 expects address of parameters in r14.
         syscall 5
         jr r31
-print2: daddi r1, r0, printfstring1     ; r5 now holds pointer to string to print
-        sd r1, printfparams1(r0)        ; put pointer first in parameters section
+print2: daddi r10, r0, printfstring1     ; r5 now holds pointer to string to print
+        sd r10, printfparams1(r0)        ; put pointer first in parameters section
         daddi r14, r0, printfparams1    ; syscall 5 expects address of parameters in r14.
         syscall 5
         jr r31
-print3: daddi r1, r0, printfstring2     ; r5 now holds pointer to string to print
-        sd r1, printfparams2(r0)        ; put pointer first in parameters section
+print3: daddi r10, r0, printfstring2     ; r5 now holds pointer to string to print
+        sd r10, printfparams2(r0)        ; put pointer first in parameters section
         daddi r14, r0, printfparams2    ; syscall 5 expects address of parameters in r14.
         syscall 5
         jr r31
-print4: daddi r1, r0, printfstring3     ; r5 now holds pointer to string to print
-        sd r1, printfparams3(r0)        ; put pointer first in parameters section
+print4: daddi r10, r0, printfstring3     ; r5 now holds pointer to string to print
+        sd r10, printfparams3(r0)        ; put pointer first in parameters section
         daddi r14, r0, printfparams3    ; syscall 5 expects address of parameters in r14.
         syscall 5
  ; stop execution.
