@@ -1,0 +1,100 @@
+;--------------------------------------------------------------------------
+;
+; Data space to store values associated with Y <- aX + Y calculation.
+;
+;--------------------------------------------------------------------------
+
+               .data     ; start of data space
+length:        .word64   6                                               ; number of elements in vector
+scalara:       .double   2.5                                             ; scalar
+vectorX:       .double   10.0,  101.0, -1.9,  10.1,   3.002,   -257.72   ; first vector
+vectorY:       .double   -4.5,    1.1,  3.8, 206.1,   100.7,    -88.12   ; second vector
+
+
+;--------------------------------------------------------------------------
+;
+; Code space.
+;
+; Code calculates Y <- a*X+Y, where X and Y are vectors in data memory.
+;
+;
+; general purpose register usage:
+;   r1 : byte index into vectors 
+;   r2 : ending counter value for loop
+;   r4 : +8
+;   r5 : +16
+;   r6 : +24
+;
+;
+; floating-point register usage:
+;   f1 : x, an element of X
+;   f2 : y, an element of Y
+;   f3 : the scalar a
+;   f4 : temporary variable for a*x
+;   f5 : temporary variable for a*x + y
+; 
+;   f6 : x, an element of X-1
+;   f7 : y, an element of Y-1
+;   f8 : temporary variable for a*(x-1)
+;   f9 : temporary variable for a*(x-1) + y-1
+;   f10 : x, an element of X-2
+;   f11 : y, an element of Y-2
+;   f12 : temporary variable for a*(x-2)
+;   f13 : temporary variable for a*(x-2) + y-2
+;   f14 : x, an element of X-2
+;   f15 : y, an element of Y-2
+;   f16 : temporary variable for a*(x-2)
+;   f17 : temporary variable for a*(x-2)+ y-2
+;--------------------------------------------------------------------------
+
+               .text     ; start of code space
+main:   
+         
+               ; Prepare for the loop by pre-calculating the final value of the vector index / loop counter,
+               ; length * 8 (since a floating-point double is eight bytes), and pre-loading the scalar a.
+
+               ld r3, length(r0)       ; load the length of the vectors into r1.
+               dsll r2, r3, 3          ; use shift-left to calculate length * 8.
+               daddi r1, r0, 0         ; index 0 
+               daddi r4, r0, 8                      
+               daddi r5, r0, 16         
+               daddi r6, r0, 24         .
+               
+	             ldc1 f3, scalara(r3)    ;load scalara to f3 
+	             ldc1 f1, vectorX(r1)    
+               ldc1 f2, vectorY(r1)               
+               mul.d f4, f1, f3        ; aX
+	       
+               ldc1 f6, vectorX(r4)    ; load x+1
+               ldc1 f7, vectorY(r4)    ; load y+1
+               
+               add.d f5, f4, f2        ; aX + Y          
+               mul.d f8, f6, f3        ; x*(x+1) + Y
+
+               ldc1 f10, vectorX(r5)    ; load X+2
+               ldc1 f11, vectorY(r5)    ; load Y+2
+
+loop:          sdc1 f5, vectorY(r1)    ; store the result over Y
+               add.d f9, f6, f7        ; aX+1 + Y+1   
+               mul.d f12, f10, f3        ; a*x+2
+               ldc1 f14, vectorX(r6)    ; load x+3
+               ldc1 f15, vectorY(r6)    ; load Y+3   
+
+               addi r6, r6, +8;        ;increment indice
+               addi r5, r5, +8;       
+               addi r4, r4, +8;        
+               addi r1, r1, +8;       
+               bne r6, r2, loop        ; loop back
+
+windown:    
+               sdc1 f9, vectorY(r4)    ; store over Y 
+    
+               add.d f13, f12, f11      ;a*(x+2) + y+2   
+               sdc1 f11, vectorY(r5)    ;store over y+1
+ 	             mul.d f16, f14, f3       ;a*(x+3)
+               add.d f17, f16, f15      ;a*(x+3)+y+3 
+               sdc1 f15, vectorY(r6)    ;store result
+
+
+               ; stop execution.
+over:          syscall 0   
