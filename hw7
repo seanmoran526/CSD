@@ -58,10 +58,10 @@ main:
                daddi r1, r0, 0         ; index 0 
                daddi r4, r0, 8                      
                daddi r5, r0, 16         
-               daddi r6, r0, 24         .
+               daddi r6, r0, 24        
                
-	             ldc1 f3, scalara(r3)    ;load scalara to f3 
-	             ldc1 f1, vectorX(r1)    
+	       ldc1 f3, scalara(r3)    ;load scalara to f3 
+	       ldc1 f1, vectorX(r1)    
                ldc1 f2, vectorY(r1)               
                mul.d f4, f1, f3        ; aX
 	       
@@ -88,7 +88,6 @@ loop:          sdc1 f5, vectorY(r1)    ; store the result over Y
 
 windown:    
                sdc1 f9, vectorY(r4)    ; store over Y 
-    
                add.d f13, f12, f11      ;a*(x+2) + y+2   
                sdc1 f11, vectorY(r5)    ;store over y+1
  	             mul.d f16, f14, f3       ;a*(x+3)
