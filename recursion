@@ -1,0 +1,25 @@
+
+        
+        addi r13, r0, 1          ; initialize power of 2 to 1
+        addi r14, r0, 1          ; init base case boundary
+        addi r15, r0, 0          ; r15 holds the shift counter
+      
+recur:
+        ; Base Case
+        
+        sub r1, r1, r13             ; subtract power of 2 from length
+        BEQ r1, r14, done           ; if r1 reaches zero branch to stack unravel portion
+        
+        ; Layer the Stack with Return address and 
+        addi r29, r29, -8       ; r29 is the stack pointer make room for 2 values
+        sw r7, 0(r29)           ; store iteration boundary on stack
+        sw r13, 4(r29)          ; store power of 2 currently on
+        
+        sll r13, r13, 1         ; put next power of 2 into r13
+        JAL recur               ; Recursive step
+        
+; Calculation portion
+; So the stack is layered with the higher iterations on top and lower on bottom   
+
+        
+        
