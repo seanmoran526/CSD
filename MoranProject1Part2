@@ -28,7 +28,7 @@ average:       .word32 0    ; space to store result to be printed, a 32-bit inte
                .text        ; start of code space
                
 main:
-        lwu r10, length(r0)     ; load 32-bit unsigned integer at length label.
+        lwu r1, length(r0)     ; load 32-bit unsigned integer at length label.
         addi r2, r0, 4          ; **independent instr to save stall**; initialize r2 to vector[1] for the loop
         sll r8, r1, 2           ; r8 = length*4 for proper memory segments
         
@@ -36,6 +36,8 @@ main:
         lw r5, vector(r0)       ; r5 is max register and init to vector[0]
         ld r6, vector(r0)       ; r6 is average register and init to vector[0]
         
+        add r10, r0, r0                  ; init r10 to be shift counter
+        addi r11, r0, 1                  ; r11 = 1 the boundary cond.
 loop:   
         BEQ r2, r8, done
         lw r3, vector(r2)       ; load signed element from vector indexed by r2
@@ -48,8 +50,15 @@ loop:
         movn r5, r3, r9         ; moves r3 into r5 if r3 was larger than last r5
         
         J loop                  ; unconditional jump to loop
+
+lp2:
+        BEQ r1, r11, out                 ; if the length is shifted to 1 exit loop
+        srl r1, r1, 1                   ; shift r1 right by 1
+        addi r10, r10, 1                  ; increment shift counter
+        J lp2                           ; uncond jump
         
-done:  
+        dsrlv r6, r6, r10               ; shift r6 by shift counter to get avg = sum/n
+
         sd r5, maximum(r0)
         daddi r1, r0, printfstring0     ; r1 now holds pointer to string to print
         sd r1, printfparams0(r0)        ; put pointer first inyv parameters section
@@ -62,24 +71,13 @@ done:
         daddi r14, r0, printfparams1    ; syscall 5 expects address of parameters in r14.
         syscall 5
 
-shft:
-        BNEZ r10, over
         sd r6, average(r0)
+        daddi r1, r0, printfstring2     ; r5 now holds pointer to string to print
+        sd r1, printfparams2(r0)        ; put pointer first in parameters section
+        daddi r14, r0, printfparams2    ; syscall 5 expects address of parameters in r14.
+        syscall 5
+
+        ; stop execution.
+        syscall 0
 
         
- ; MODIFY THIS CODE TO PRINT ALL FOUR RESULTS; this template prints just one.
- ; save result to designated spot in memory.
- ; (Replace r3 with a reference to the register you used for your maximum.)
- ; this code prints the result. Before making system call syscall 5,
- ; r14 must have the address of the parameters for the printf function.
- ; at that address, the first thing is a pointer to the ascii string;
- ; after that comes data for any parameters for the printf.
-
-
-daddi r1, r0, printfstring2     ; r5 now holds pointer to string to print
-sd r1, printfparams2(r0)        ; put pointer first in parameters section
-daddi r14, r0, printfparams2    ; syscall 5 expects address of parameters in r14.
-syscall 5
-
- ; stop execution.
- syscall 0
