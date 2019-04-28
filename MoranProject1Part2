@@ -56,7 +56,8 @@ lp2:
         srl r1, r1, 1                   ; shift r1 right by 1
         addi r10, r10, 1                ; increment shift counter
         J lp2                           ; uncond jump
-        
+
+out:
         dsrlv r6, r6, r10               ; shift r6 by shift counter to get avg = sum/n
 
         sd r5, maximum(r0)
